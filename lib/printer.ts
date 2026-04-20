@@ -1,9 +1,10 @@
 import path from 'path';
-import { exec } from 'child_process';
+import { exec, execFile } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
 
 const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export async function printFile(filePath: string, printerName?: string) {
   const ext = path.extname(filePath).toLowerCase();

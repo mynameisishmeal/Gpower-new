@@ -288,7 +288,7 @@ export default function AnalyticsPage() {
                         cx="50%"
                         cy="50%"
                         labelLine={true}
-                        label={(entry) => `${entry.name.charAt(0).toUpperCase() + entry.name.slice(1)}: ₦${entry.value.toLocaleString()}`}
+                        label={(entry) => entry.name ? `${entry.name.charAt(0).toUpperCase() + entry.name.slice(1)}: ₦${entry.value.toLocaleString()}` : ''}
                         outerRadius={100}
                         fill="#8884d8"
                         dataKey="value"

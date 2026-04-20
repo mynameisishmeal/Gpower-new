@@ -16,7 +16,7 @@ export async function GET() {
 
     const todaySales = await Sales.find({ saledate: todayString });
     const todayRevenue = todaySales.reduce((sum, sale) => {
-      const total = parseFloat(sale.producttotal) || 0;
+      const total = parseFloat(String(sale.producttotal)) || 0;
       return sum + total;
     }, 0);
     const productsSold = todaySales.length;

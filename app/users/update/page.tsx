@@ -1,11 +1,11 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Navigation from '@/components/Navigation';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useToast } from '@/components/Toast';
 
-export default function UpdateUserPage() {
+function UpdateUserForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userId = searchParams.get('id');
@@ -296,5 +296,13 @@ export default function UpdateUserPage() {
       </div>
       </div>
     </>
+  );
+}
+
+export default function UpdateUserPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center"><Loader2 className="h-12 w-12 text-blue-600 animate-spin" /></div>}>
+      <UpdateUserForm />
+    </Suspense>
   );
 }
