@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-export default function SoldByPage() {
+function SoldByContent() {
   const searchParams = useSearchParams();
   const [sales, setSales] = useState([]);
   const [seller, setSeller] = useState('');
@@ -59,5 +59,13 @@ export default function SoldByPage() {
         Total: ₦{calculateTotal().toFixed(2)}
       </div>
     </div>
+  );
+}
+
+export default function SoldByPage() {
+  return (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <SoldByContent />
+    </Suspense>
   );
 }

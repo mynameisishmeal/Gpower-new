@@ -1,9 +1,9 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Navigation from '@/components/Navigation';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function UpdateCustomerPage() {
+function UpdateCustomerForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const customerId = searchParams.get('id');
@@ -84,5 +84,13 @@ export default function UpdateCustomerPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function UpdateCustomerPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">Loading...</div>}>
+      <UpdateCustomerForm />
+    </Suspense>
   );
 }

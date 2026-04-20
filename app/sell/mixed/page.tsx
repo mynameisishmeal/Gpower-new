@@ -227,9 +227,9 @@ export default function SellMixedPage() {
     if (bluetoothConnected) {
       await bluetoothPrinter.disconnect();
       setBluetoothConnected(false);
-      showToast('Bluetooth disconnected', 'info');
+      showToast('Bluetooth disconnected', 'success');
     } else {
-      showToast('Connecting to Bluetooth printer...', 'info');
+      showToast('Connecting to Bluetooth printer...', 'warning');
       const connected = await bluetoothPrinter.connect();
       if (connected) {
         setBluetoothConnected(true);

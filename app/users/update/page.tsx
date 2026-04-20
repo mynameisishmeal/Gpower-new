@@ -1,11 +1,11 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Navigation from '@/components/Navigation';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useToast } from '@/components/Toast';
 
-export default function UpdateUserPage() {
+function UpdateUserForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userId = searchParams.get('id');
@@ -296,5 +296,13 @@ export default function UpdateUserPage() {
       </div>
       </div>
     </>
+  );
+}
+
+export default function UpdateUserPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">Loading...</div>}>
+      <UpdateUserForm />
+    </Suspense>
   );
 }

@@ -8,6 +8,16 @@ export interface IUser {
   lastname?: string;
   phonenumber?: string;
   role: 'sadmin' | 'admin' | 'worker';
+  permissions?: {
+    canViewInventory?: boolean;
+    canManageInventory?: boolean;
+    canViewCustomers?: boolean;
+    canManageCustomers?: boolean;
+    canViewFinance?: boolean;
+    canManageFinance?: boolean;
+    canViewAnalytics?: boolean;
+    canManageUsers?: boolean;
+  };
   city?: string;
   birthday?: number;
   birthmonth?: number;
