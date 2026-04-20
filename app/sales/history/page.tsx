@@ -8,7 +8,7 @@ import { useToast } from '@/components/Toast';
 
 export default function SalesHistoryPage() {
   const { showToast, ToastContainer } = useToast();
-  const [sales, setSales] = useState<any[]>([]);
+  const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sellers, setSellers] = useState<string[]>([]);
   const [sortConfig, setSortConfig] = useState<{key: string, direction: 'asc' | 'desc'}>({ key: 'sale_no', direction: 'desc' });
@@ -253,7 +253,7 @@ export default function SalesHistoryPage() {
                 Apply Filters
               </button>
               <button 
-                onClick={() => showToast('Export feature coming soon!', 'warning')}
+                onClick={() => showToast('Export feature coming soon!', 'info')}
                 className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-all font-semibold"
               >
                 <Download className="h-5 w-5" />

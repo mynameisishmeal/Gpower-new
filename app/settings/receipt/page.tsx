@@ -133,40 +133,66 @@ export default function ReceiptSettingsPage() {
 
           <div className="bg-white rounded-2xl shadow-lg p-6 max-w-2xl mt-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Receipt Preview</h2>
-            <div className="bg-gray-50 p-6 rounded-lg font-mono text-sm">
+            <div className="bg-gray-900 text-white p-6 rounded-lg font-mono text-sm">
               <div className="text-center mb-4">
                 <div className="font-bold text-lg">{settings.storeName || 'GPOWER CRM'}</div>
                 {settings.storeAddress && (
-                  <div className="text-xs text-gray-600 mt-1 whitespace-pre-line">{settings.storeAddress}</div>
+                  <div className="text-xs text-gray-300 mt-1 whitespace-pre-line">{settings.storeAddress}</div>
                 )}
-                <div className="text-xs text-gray-600">================================</div>
+                <div className="text-xs text-gray-400">================================</div>
               </div>
-              <div className="mb-4">
+              <div className="mb-4 text-xs">
                 <div>Date: 15-1-2025</div>
                 <div>Time: 2:30 PM</div>
               </div>
-              <div className="text-xs text-gray-600 mb-2">================================</div>
-              <div className="mb-4">
+              <div className="text-xs text-gray-400 mb-2">================================</div>
+              <div className="mb-4 text-xs">
                 <div className="font-semibold mb-2">ITEMS:</div>
-                <div>Sample Product</div>
-                <div className="ml-4">2 Cartons x N5,000</div>
-                <div className="ml-4">Total: N10,000</div>
+                <div className="text-xs text-gray-400 mb-2">--------------------------------</div>
+                <div className="mb-3">
+                  <div>Frozen Chicken</div>
+                  <div className="ml-2">2.5 x N5,000</div>
+                  <div className="ml-2">Total: N12,500</div>
+                </div>
+                <div className="mb-3">
+                  <div>Turkey Wings</div>
+                  <div className="ml-2">3.5 KG x N3,500</div>
+                  <div className="ml-2">Total: N12,250</div>
+                </div>
               </div>
-              <div className="text-xs text-gray-600 mb-2">================================</div>
-              <div className="mb-4">
-                <div>Subtotal: N10,000</div>
-                <div className="font-bold">TOTAL: N10,000</div>
+              <div className="text-xs text-gray-400 mb-2">--------------------------------</div>
+              <div className="mb-4 text-xs">
+                <div>Subtotal: N24,750</div>
+                <div className="font-bold text-base">TOTAL: N24,750</div>
               </div>
-              <div className="text-xs text-gray-600 mb-2">================================</div>
-              <div className="text-center mt-4">
+              <div className="text-xs text-gray-400 mb-2">================================</div>
+              <div className="mb-2 text-xs">
+                <div className="font-semibold">PAYMENT:</div>
+                <div>CASH: N24,750</div>
+              </div>
+              <div className="text-xs text-gray-400 mb-2">================================</div>
+              <div className="text-center mt-4 text-xs">
                 <div>{settings.receiptFooter || 'Thank you!'}</div>
               </div>
               {settings.receiptDisclaimer && (
-                <div className="text-center mt-3 text-xs text-gray-600 whitespace-pre-line border-t border-gray-300 pt-3">
-                  {settings.receiptDisclaimer}
-                </div>
+                <>
+                  <div className="text-xs text-gray-400 my-2">--------------------------------</div>
+                  <div className="text-center text-xs text-gray-300 whitespace-pre-line">
+                    {settings.receiptDisclaimer}
+                  </div>
+                </>
               )}
-              <div className="text-xs text-gray-600 mt-2">================================</div>
+              <div className="text-xs text-gray-400 mt-2">================================</div>
+            </div>
+            
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+              <h3 className="font-semibold text-sm text-blue-900 mb-2">Receipt Format Guide:</h3>
+              <ul className="text-xs text-blue-800 space-y-1">
+                <li>• Cartons: Shows as "2.5 x N5,000" (quantity without unit)</li>
+                <li>• Kilos: Shows as "3.5 KG x N3,500" (quantity with KG)</li>
+                <li>• All text is editable above</li>
+                <li>• Receipt prints on 58mm thermal paper</li>
+              </ul>
             </div>
           </div>
         </div>

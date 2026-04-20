@@ -257,7 +257,6 @@ export default function CreateUserPage() {
           </form>
         </div>
       </div>
-      </div>
     </>
   );
 }

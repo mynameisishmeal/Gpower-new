@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Save, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
-function UpdateStockForm() {
+export default function UpdateStockPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
@@ -78,13 +78,5 @@ function UpdateStockForm() {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function UpdateStockPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">Loading...</div>}>
-      <UpdateStockForm />
-    </Suspense>
   );
 }

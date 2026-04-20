@@ -1,7 +1,7 @@
 // Global singleton to persist across React re-renders
-let globalBluetoothDevice: any | null = null;
-let globalCharacteristic: any | null = null;
-let globalGattServer: any | null = null;
+let globalBluetoothDevice: BluetoothDevice | null = null;
+let globalCharacteristic: BluetoothRemoteGATTCharacteristic | null = null;
+let globalGattServer: BluetoothRemoteGATTServer | null = null;
 
 export class BluetoothPrinter {
   private serviceUUID: string;
@@ -35,7 +35,7 @@ export class BluetoothPrinter {
     try {
       console.log('Requesting Bluetooth device with service UUID:', this.serviceUUID);
       
-      globalBluetoothDevice = await (navigator as any).bluetooth.requestDevice({
+      globalBluetoothDevice = await navigator.bluetooth.requestDevice({
         filters: [{ services: [this.serviceUUID] }]
       });
 

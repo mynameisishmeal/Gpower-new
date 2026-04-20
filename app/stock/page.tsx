@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { Edit, Trash2, Package, Loader2, AlertTriangle, X } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -8,7 +8,7 @@ import Navigation from '@/components/Navigation';
 import { useToast } from '@/components/Toast';
 import { useConfirmModal } from '@/components/ConfirmModal';
 
-function StockContent() {
+export default function StockPage() {
   const { showToast, ToastContainer } = useToast();
   const { showConfirm, ConfirmModalComponent } = useConfirmModal();
   const searchParams = useSearchParams();
@@ -221,13 +221,5 @@ function StockContent() {
         </div>
       </div>
     </>
-  );
-}
-
-export default function StockPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">Loading...</div>}>
-      <StockContent />
-    </Suspense>
   );
 }

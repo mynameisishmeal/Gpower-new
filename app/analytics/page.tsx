@@ -288,10 +288,7 @@ export default function AnalyticsPage() {
                         cx="50%"
                         cy="50%"
                         labelLine={true}
-                        label={(entry) => {
-                          const name = entry.name || 'Unknown';
-                          return `${name.charAt(0).toUpperCase() + name.slice(1)}: ₦${entry.value.toLocaleString()}`;
-                        }}
+                        label={(entry) => `${entry.name.charAt(0).toUpperCase() + entry.name.slice(1)}: ₦${entry.value.toLocaleString()}`}
                         outerRadius={100}
                         fill="#8884d8"
                         dataKey="value"
@@ -307,10 +304,7 @@ export default function AnalyticsPage() {
                       <Legend 
                         verticalAlign="bottom" 
                         height={36}
-                        formatter={(value, entry: any) => {
-                          const name = entry.payload.name || 'Unknown';
-                          return `${name.charAt(0).toUpperCase() + name.slice(1)}`;
-                        }}
+                        formatter={(value, entry: any) => `${entry.payload.name.charAt(0).toUpperCase() + entry.payload.name.slice(1)}`}
                       />
                     </PieChart>
                   </ResponsiveContainer>
@@ -326,7 +320,7 @@ export default function AnalyticsPage() {
                         cx="50%"
                         cy="50%"
                         labelLine={true}
-                        label={(entry) => `${entry.name || 'Unknown'}: ₦${entry.value.toLocaleString()}`}
+                        label={(entry) => `${entry.name}: ₦${entry.value.toLocaleString()}`}
                         outerRadius={100}
                         fill="#8884d8"
                         dataKey="value"

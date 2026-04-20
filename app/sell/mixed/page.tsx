@@ -227,9 +227,9 @@ export default function SellMixedPage() {
     if (bluetoothConnected) {
       await bluetoothPrinter.disconnect();
       setBluetoothConnected(false);
-      showToast('Bluetooth disconnected', 'success');
+      showToast('Bluetooth disconnected', 'info');
     } else {
-      showToast('Connecting to Bluetooth printer...', 'warning');
+      showToast('Connecting to Bluetooth printer...', 'info');
       const connected = await bluetoothPrinter.connect();
       if (connected) {
         setBluetoothConnected(true);
@@ -290,7 +290,7 @@ export default function SellMixedPage() {
     
     cart.forEach(item => {
       receipt += `${item.name}\n`;
-      receipt += `  ${item.quantity} ${item.type === 'carton' ? 'Cartons' : 'KG'} x N${item.price.toLocaleString()}\n`;
+      receipt += `  ${item.quantity} ${item.type === 'carton' ? 'x' : 'KG x'} N${item.price.toLocaleString()}\n`;
       receipt += `  Total: N${item.total.toLocaleString()}\n\n`;
     });
     
@@ -552,7 +552,33 @@ export default function SellMixedPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3">₦{item.price.toLocaleString()}</td>
-                      <td className="px-4 py-3">{item.quantity} {item.type === 'carton' ? 'Cartons' : 'KG'}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1">
+                          <button 
+                            onClick={() => {
+                              const newQty = Math.max(0.5, Number((item.quantity - 0.5).toFixed(1)));
+                              const updated = [...cart];
+                              updated[idx] = { ...item, quantity: newQty, total: Number((item.price * newQty).toFixed(2)) };
+                              setCart(updated);
+                            }}
+                            className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm font-bold"
+                          >
+                            -
+                          </button>
+                          <span className="px-2 min-w-[60px] text-center">{item.quantity} {item.type === 'carton' ? 'Cartons' : 'KG'}</span>
+                          <button 
+                            onClick={() => {
+                              const newQty = Number((item.quantity + 0.5).toFixed(1));
+                              const updated = [...cart];
+                              updated[idx] = { ...item, quantity: newQty, total: Number((item.price * newQty).toFixed(2)) };
+                              setCart(updated);
+                            }}
+                            className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm font-bold"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </td>
                       <td className="px-4 py-3">₦{item.total.toLocaleString()}</td>
                       <td className="px-4 py-3">
                         <button onClick={() => setCart(cart.filter((_, i) => i !== idx))} className="text-red-500 hover:text-red-700">
@@ -623,7 +649,7 @@ export default function SellMixedPage() {
               ) : (
                 <div className="flex items-center gap-2 mb-4">
                   <button 
-                    onClick={() => setQuantity(String(Math.max(1, Number(quantity || 0) - 1)))}
+                    onClick={() => setQuantity(String(Math.max(0.5, Number(quantity || 0) - 0.5)))}
                     className="px-4 py-3 bg-gray-200 rounded-lg hover:bg-gray-300 font-bold text-xl"
                   >
                     -
@@ -633,12 +659,12 @@ export default function SellMixedPage() {
                     value={quantity} 
                     onChange={(e) => setQuantity(e.target.value)}
                     min="0" 
-                    step="1" 
+                    step="0.5" 
                     placeholder="Quantity (Cartons)" 
                     className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
                   />
                   <button 
-                    onClick={() => setQuantity(String(Number(quantity || 0) + 1))}
+                    onClick={() => setQuantity(String(Number(quantity || 0) + 0.5))}
                     className="px-4 py-3 bg-gray-200 rounded-lg hover:bg-gray-300 font-bold text-xl"
                   >
                     +
