@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bluetooth Printer Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        button {
+            padding: 12px 24px;
+            margin: 10px 10px 10px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-connect {
+            background: #2563eb;
+            color: white;
+        }
+        .btn-connect:hover {
+            background: #1d4ed8;
+        }
+        .btn-print {
+            background: #16a34a;
+            color: white;
+        }
+        .btn-print:hover {
+            background: #15803d;
+        }
+        .btn-disconnect {
+            background: #dc2626;
+            color: white;
+        }
+        .btn-disconnect:hover {
+            background: #b91c1c;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #log {
+            background: #1e293b;
+            color: #10b981;
+            padding: 20px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .log-entry {
+            margin: 5px 0;
+        }
+        .log-success { color: #10b981; }
+        .log-error { color: #ef4444; }
+        .log-warning { color: #f59e0b; }
+        .log-info { color: #3b82f6; }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .status-disconnected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .status-connected {
+            background: #d1fae5;
+            color: #065f46;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖨️ Bluetooth Thermal Printer Test</h1>
+        
+        <div id="status" class="status status-disconnected">
+            Status: Not Connected
+        </div>
+
+        <div class="input-group">
+            <label>Service UUID:</label>
+            <input type="text" id="serviceUUID" value="e7810a71-73ae-499d-8c15-faa9aef0c3f2">
+        </div>
+
+        <div class="input-group">
+            <label>Characteristic UUID:</label>
+            <input type="text" id="characteristicUUID" value="bef8d6c9-9c21-4c9e-b632-bd58c1009f9f">
+        </div>
+
+        <div>
+            <button class="btn-connect" id="connectBtn" onclick="connectBluetooth()">
+                Connect to Printer
+            </button>
+            <button class="btn-print" id="printBtn" onclick="printTest()" disabled>
+                Print Test Receipt
+            </button>
+            <button class="btn-disconnect" id="disconnectBtn" onclick="disconnectBluetooth()" disabled>
+                Disconnect
+            </button>
+        </div>
+
+        <div id="log"></div>
+    </div>
+
+    <script>
+        let bluetoothDevice = null;
+        let characteristic = null;
+        let gattServer = null;
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function updateStatus(connected) {
+            const statusDiv = document.getElementById('status');
+            const connectBtn = document.getElementById('connectBtn');
+            const printBtn = document.getElementById('printBtn');
+            const disconnectBtn = document.getElementById('disconnectBtn');
+
+            if (connected) {
+                statusDiv.className = 'status status-connected';
+                statusDiv.textContent = `Status: Connected to ${bluetoothDevice?.name || 'Device'}`;
+                connectBtn.disabled = true;
+                printBtn.disabled = false;
+                disconnectBtn.disabled = false;
+            } else {
+                statusDiv.className = 'status status-disconnected';
+                statusDiv.textContent = 'Status: Not Connected';
+                connectBtn.disabled = false;
+                printBtn.disabled = true;
+                disconnectBtn.disabled = true;
+            }
+        }
+
+        async function connectBluetooth() {
+            try {
+                const serviceUUID = document.getElementById('serviceUUID').value.trim();
+                const characteristicUUID = document.getElementById('characteristicUUID').value.trim();
+
+                log('🔍 Requesting Bluetooth device...', 'info');
+                log(`Service UUID: ${serviceUUID}`, 'info');
+
+                bluetoothDevice = await navigator.bluetooth.requestDevice({
+                    filters: [{ services: [serviceUUID] }]
+                });
+
+                log(`✅ Device selected: ${bluetoothDevice.name}`, 'success');
+
+                log('🔗 Connecting to GATT server...', 'info');
+                gattServer = await bluetoothDevice.gatt.connect();
+
+                if (!gattServer.connected) {
+                    throw new Error('Failed to connect to GATT server');
+                }
+
+                log('✅ GATT server connected', 'success');
+
+                log('🔍 Getting primary service...', 'info');
+                const service = await gattServer.getPrimaryService(serviceUUID);
+                log(`✅ Service obtained: ${service.uuid}`, 'success');
+
+                log('🔍 Getting characteristic...', 'info');
+                characteristic = await service.getCharacteristic(characteristicUUID);
+                log(`✅ Characteristic obtained: ${characteristic.uuid}`, 'success');
+
+                log('🎉 CONNECTION SUCCESSFUL!', 'success');
+                updateStatus(true);
+
+            } catch (error) {
+                log(`❌ Connection error: ${error.message}`, 'error');
+                console.error(error);
+                updateStatus(false);
+            }
+        }
+
+        async function disconnectBluetooth() {
+            try {
+                if (bluetoothDevice?.gatt?.connected) {
+                    bluetoothDevice.gatt.disconnect();
+                    log('🔌 Disconnected from device', 'warning');
+                }
+                bluetoothDevice = null;
+                characteristic = null;
+                gattServer = null;
+                updateStatus(false);
+            } catch (error) {
+                log(`❌ Disconnect error: ${error.message}`, 'error');
+            }
+        }
+
+        async function printTest() {
+            if (!characteristic) {
+                log('❌ No characteristic available!', 'error');
+                return;
+            }
+
+            try {
+                log('📄 Preparing test receipt...', 'info');
+
+                const receipt = `
+================================
+       GPOWER FROZEN FOODS
+================================
+Date: ${new Date().toLocaleDateString()}
+Time: ${new Date().toLocaleTimeString()}
+================================
+
+TEST RECEIPT
+
+This is a test print from the
+Bluetooth printer test tool.
+
+If you can read this, your
+printer is working correctly!
+
+================================
+     Thank you for testing!
+================================
+
+
+`;
+
+                log('📤 Encoding data...', 'info');
+                const encoder = new TextEncoder();
+                const data = encoder.encode(receipt);
+                
+                log(`📦 Data size: ${data.length} bytes`, 'info');
+
+                const chunkSize = 512;
+                const totalChunks = Math.ceil(data.length / chunkSize);
+                log(`📮 Sending ${totalChunks} chunks...`, 'info');
+
+                for (let i = 0; i < data.length; i += chunkSize) {
+                    const chunk = data.slice(i, i + chunkSize);
+                    const chunkNum = Math.floor(i / chunkSize) + 1;
+                    
+                    log(`  Sending chunk ${chunkNum}/${totalChunks} (${chunk.length} bytes)`, 'info');
+                    await characteristic.writeValue(chunk);
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                }
+
+                log('✅ PRINT SUCCESSFUL!', 'success');
+                log('Check your printer for the receipt', 'success');
+
+            } catch (error) {
+                log(`❌ Print error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        // Initialize
+        log('🚀 Bluetooth Printer Test Tool Ready', 'info');
+        log('Click "Connect to Printer" to begin', 'info');
+    </script>
+</body>
+</html>

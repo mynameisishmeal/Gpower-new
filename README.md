@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gpower CRM - Next.js Migration
 
-## Getting Started
+Modern CRM system for Gpower Frozen Foods, migrated from Express/EJS to Next.js 15 with TypeScript.
 
-First, run the development server:
+## Features
+
+- 🛒 **Dual Sales System** - Cartons and Kilos
+- 💳 **Multi-Payment** - Cash, Transfer, Card, Credit
+- 📦 **Inventory Management** - Real-time stock tracking
+- 👥 **User Management** - Role-based access control
+- 🧾 **Receipt Generation** - Print-ready receipts
+- 📊 **Analytics Dashboard** - Sales insights
+- 📱 **Responsive Design** - Mobile-friendly
+
+## Quick Start
 
 ```bash
+# Install dependencies
+npm install
+
+# Set environment variables
+cp .env.local.example .env.local
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+MONGODB_URI=mongodb://localhost:27017/mfvpos
+JWT_SECRET=your-secret-key-here
+```
 
-## Learn More
+## Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- Next.js 15
+- TypeScript
+- MongoDB
+- Tailwind CSS
+- JWT Authentication
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+gpower-nextjs/
+├── app/              # Pages and API routes
+├── components/       # Reusable components
+├── lib/             # Utilities
+├── models/          # Database models
+├── types/           # TypeScript types
+└── middleware.ts    # Auth middleware
+```
 
-## Deploy on Vercel
+## User Roles
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Super Admin** - Full access
+- **Admin** - Manage sales, stock, users
+- **Worker** - Create sales, view stock
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## API Routes
+
+- `/api/auth/login` - User authentication
+- `/api/sales/*` - Sales operations
+- `/api/stock/*` - Stock management
+- `/api/products/*` - Product management
+- `/api/users/*` - User management
+- `/api/customers/*` - Customer management
+
+## Pages
+
+- `/sell/cartons` - Sell by cartons
+- `/sell/kilos` - Sell by weight
+- `/sales/history` - View sales
+- `/stock` - Manage stock
+- `/products` - Manage products
+- `/users` - Manage users
+- `/customers` - Manage customers
+- `/analytics` - View analytics
+- `/settings` - Configure system
+
+## License
+
+Proprietary - Gpower Frozen Foods
+
+## Support
+
+Contact development team for support.
