@@ -21,10 +21,7 @@
       "filter": ["**/*"]
     }
   ],
-  "asar": true,
-  "asarUnpack": [
-    "**/node_modules/pdf-to-printer/**"
-  ],
+  "asar": false,
   "win": {
     "target": [
       {
