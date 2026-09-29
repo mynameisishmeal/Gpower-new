@@ -13,13 +13,35 @@ export default function UsersPage() {
   const { showConfirm, ConfirmModalComponent } = useConfirmModal();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [authorized, setAuthorized] = useState(false);
+  const [currentUserRole, setCurrentUserRole] = useState('');
   const [showPasswords, setShowPasswords] = useState<{[key: string]: boolean}>({});
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [promotingId, setPromotingId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    const rawUser = localStorage.getItem('user');
+    if (!rawUser) {
+      router.push('/login');
+      return;
+    }
+
+    try {
+      const userData = JSON.parse(rawUser);
+      // Strictly prevent user and admin unless granted canManageUsers by Super Admin
+      const hasPermission = userData.role === 'sadmin' || userData.permissions?.canManageUsers === true;
+      if (!hasPermission) {
+        showToast('Access denied! You do not have permission to access the Users page.', 'error');
+        router.push('/dashboard');
+        return;
+      }
+      setAuthorized(true);
+      setCurrentUserRole(userData.role || '');
+      fetchUsers();
+    } catch {
+      router.push('/login');
+    }
+  }, [router]);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -84,6 +106,21 @@ export default function UsersPage() {
     };
     return styles[role as keyof typeof styles] || 'bg-gray-100 text-gray-700';
   };
+
+  if (!authorized) {
+    return (
+      <>
+        <ToastContainer />
+        <Navigation />
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+          <div className="text-center text-gray-500">
+            <Loader2 className="h-10 w-10 animate-spin text-blue-600 mx-auto mb-3" />
+            <p>Verifying permissions...</p>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -164,23 +201,27 @@ export default function UsersPage() {
                         <td className="p-3 text-gray-700">{user.phonenumber}</td>
                         <td className="p-3">
                           <div className="flex items-center justify-center gap-2 flex-wrap">
-                            <div className="flex items-center gap-2">
-                              <label className="text-xs text-gray-600 font-semibold">Promote:</label>
-                              <select
-                                value={user.role}
-                                onChange={(e) => handlePromote(user._id, e.target.value, user.role)}
-                                disabled={promotingId === user._id}
-                                className="text-xs px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                <option value="worker">Worker</option>
-                                <option value="admin">Admin</option>
-                                <option value="sadmin">Super Admin</option>
-                              </select>
-                              {promotingId === user._id && (
-                                <Loader2 className="h-3 w-3 animate-spin text-blue-600" />
-                              )}
-                            </div>
-                            <div className="h-4 w-px bg-gray-300"></div>
+                            {currentUserRole === 'sadmin' && (
+                              <>
+                                <div className="flex items-center gap-2">
+                                  <label className="text-xs text-gray-600 font-semibold">Promote:</label>
+                                  <select
+                                    value={user.role}
+                                    onChange={(e) => handlePromote(user._id, e.target.value, user.role)}
+                                    disabled={promotingId === user._id}
+                                    className="text-xs px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  >
+                                    <option value="worker">Worker</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="sadmin">Super Admin</option>
+                                  </select>
+                                  {promotingId === user._id && (
+                                    <Loader2 className="h-3 w-3 animate-spin text-blue-600" />
+                                  )}
+                                </div>
+                                <div className="h-4 w-px bg-gray-300"></div>
+                              </>
+                            )}
                             <button 
                               onClick={() => router.push(`/users/update?id=${user._id}`)}
                               className="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1"

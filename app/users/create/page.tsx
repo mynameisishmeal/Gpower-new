@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
@@ -8,10 +8,32 @@ import { useToast } from '@/components/Toast';
 export default function CreateUserPage() {
   const router = useRouter();
   const { showToast, ToastContainer } = useToast();
+  const [authorized, setAuthorized] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
+
+  useEffect(() => {
+    const rawUser = localStorage.getItem('user');
+    if (!rawUser) {
+      router.push('/login');
+      return;
+    }
+
+    try {
+      const userData = JSON.parse(rawUser);
+      const hasPermission = userData.role === 'sadmin' || userData.permissions?.canManageUsers === true;
+      if (!hasPermission) {
+        showToast('Access denied! You do not have permission to create users.', 'error');
+        router.push('/dashboard');
+        return;
+      }
+      setAuthorized(true);
+    } catch {
+      router.push('/login');
+    }
+  }, [router]);
   const [formData, setFormData] = useState({
     firstname: '',
     lastname: '',
@@ -78,6 +100,21 @@ export default function CreateUserPage() {
       setLoading(false);
     }
   };
+
+  if (!authorized) {
+    return (
+      <>
+        <ToastContainer />
+        <Navigation />
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+          <div className="text-center text-gray-500">
+            <Loader2 className="h-10 w-10 animate-spin text-blue-600 mx-auto mb-3" />
+            <p>Verifying permissions...</p>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>

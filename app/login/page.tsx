@@ -35,7 +35,14 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password })
       });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data: any;
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        setError(`Server error (${response.status}): ${responseText.trim() || 'Internal server error'}`);
+        return;
+      }
 
       if (data.success) {
         if (rememberMe) {
@@ -50,10 +57,12 @@ export default function LoginPage() {
         localStorage.setItem('userId', data.data._id);
         router.push('/dashboard');
       } else {
-        setError(data.message || 'Login failed');
+        const errorDetail = data.error ? `${data.message}: ${data.error}` : (data.message || 'Login failed');
+        setError(errorDetail);
       }
-    } catch (err) {
-      setError('An error occurred. Please try again.');
+    } catch (err: any) {
+      console.error('Login submit error:', err);
+      setError(`Connection error: ${err?.message || 'Server did not respond. Please check your database connection.'}`);
     } finally {
       setLoading(false);
     }
@@ -63,8 +72,11 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-blue-700">
       <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-blue-600 mb-2">Gpower CRM</h1>
-          <p className="text-gray-600">Sign in to your account</p>
+          <div className="flex justify-center mb-4">
+            <img src="/logo.png" alt="Gpower CRM" className="h-16 w-16 rounded-2xl shadow-md object-contain p-1 bg-white border border-gray-100" />
+          </div>
+          <h1 className="text-3xl font-bold text-blue-600 mb-1">Gpower CRM</h1>
+          <p className="text-gray-600 text-sm">Sign in to your account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">

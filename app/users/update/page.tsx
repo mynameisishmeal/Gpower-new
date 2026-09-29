@@ -10,6 +10,8 @@ function UpdateUserForm() {
   const searchParams = useSearchParams();
   const userId = searchParams.get('id');
   const { showToast, ToastContainer } = useToast();
+  const [authorized, setAuthorized] = useState(false);
+  const [currentUserRole, setCurrentUserRole] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetchingUser, setFetchingUser] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -34,10 +36,29 @@ function UpdateUserForm() {
   });
 
   useEffect(() => {
-    if (userId) {
-      fetchUser();
+    const rawUser = localStorage.getItem('user');
+    if (!rawUser) {
+      router.push('/login');
+      return;
     }
-  }, [userId]);
+
+    try {
+      const userData = JSON.parse(rawUser);
+      const hasPermission = userData.role === 'sadmin' || userData.permissions?.canManageUsers === true;
+      if (!hasPermission) {
+        showToast('Access denied! You do not have permission to edit users.', 'error');
+        router.push('/dashboard');
+        return;
+      }
+      setAuthorized(true);
+      setCurrentUserRole(userData.role || '');
+      if (userId) {
+        fetchUser();
+      }
+    } catch {
+      router.push('/login');
+    }
+  }, [userId, router]);
 
   const fetchUser = async () => {
     setFetchingUser(true);
@@ -114,6 +135,21 @@ function UpdateUserForm() {
       setLoading(false);
     }
   };
+
+  if (!authorized) {
+    return (
+      <>
+        <ToastContainer />
+        <Navigation />
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+          <div className="text-center text-gray-500">
+            <Loader2 className="h-10 w-10 animate-spin text-blue-600 mx-auto mb-3" />
+            <p>Verifying permissions...</p>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -258,8 +294,16 @@ function UpdateUserForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">User Role *</label>
-              <select required value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})} className="w-full px-4 py-3 border border-gray-300 rounded-lg">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                User Role * {currentUserRole !== 'sadmin' && <span className="text-xs text-gray-500 font-normal">(Only Super Admin can change roles)</span>}
+              </label>
+              <select 
+                required 
+                disabled={currentUserRole !== 'sadmin'}
+                value={formData.role} 
+                onChange={(e) => setFormData({...formData, role: e.target.value})} 
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
                 <option value="worker">WORKER</option>
                 <option value="admin">ADMIN</option>
                 <option value="sadmin">SUPER ADMIN</option>

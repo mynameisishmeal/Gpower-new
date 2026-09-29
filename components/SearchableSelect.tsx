@@ -93,9 +93,9 @@ export function SearchableSelect({ options, value, onChange, placeholder, allowC
                 )}
               </div>
             ) : (
-              filteredOptions.map(option => (
+              filteredOptions.map((option, index) => (
                 <div
-                  key={option.value}
+                  key={`${option.value}-${index}`}
                   onClick={() => handleSelect(option.value)}
                   className="px-4 py-3 hover:bg-gray-100 cursor-pointer text-gray-900"
                 >

@@ -1,0 +1,48 @@
+{
+  "appId": "com.gpower.crm",
+  "productName": "Gpower CRM",
+  "copyright": "Copyright © 2026 Gpower",
+  "directories": {
+    "output": "dist-electron"
+  },
+  "files": [
+    ".next/**/*",
+    "!.next/cache/**/*",
+    "!.next/dev/**/*",
+    "!.next/**/*.lock",
+    "public/**/*",
+    "electron/**/*",
+    "package.json"
+  ],
+  "extraResources": [
+    {
+      "from": ".env.local",
+      "to": ".env.local",
+      "filter": ["**/*"]
+    }
+  ],
+  "asar": false,
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ],
+    "icon": "electron/icon.ico"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Gpower CRM"
+  },
+  "publish": {
+    "provider": "github",
+    "owner": "mynameisishmeal",
+    "repo": "Gpower-new",
+    "releaseType": "release"
+  }
+}

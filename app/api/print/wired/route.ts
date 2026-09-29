@@ -3,6 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { printFile } from '@/lib/printer';
+import dbConnect from '@/lib/mongodb';
+import Settings from '@/models/Settings';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,6 +13,19 @@ export async function POST(request: NextRequest) {
     if (!text) {
       return NextResponse.json({ success: false, error: 'No text provided' }, { status: 400 });
     }
+
+    // Fetch receipt settings from database
+    await dbConnect();
+    const settingsDoc = await Settings.findOne();
+    const receiptSettings = {
+      storeNameSize: settingsDoc?.storeNameSize ?? 3,
+      addressSize: settingsDoc?.addressSize ?? 0,
+      itemsSize: settingsDoc?.itemsSize ?? 0,
+      priceSize: settingsDoc?.priceSize ?? 0,
+      totalSize: settingsDoc?.totalSize ?? 2,
+      footerSize: settingsDoc?.footerSize ?? 0,
+      autoCut: settingsDoc?.autoCut ?? true
+    };
 
     // Use printer from request, or try to get from settings
     let printerName = requestPrinterName;
@@ -28,9 +43,9 @@ export async function POST(request: NextRequest) {
         const txtPath = path.join(uploadsDir, 'receipt_print.txt');
         fs.writeFileSync(txtPath, text, 'utf8');
 
-        // Print using custom printer utility
+        // Print using custom printer utility with settings
         try {
-          await printFile(txtPath, printerName);
+          await printFile(txtPath, printerName, receiptSettings);
           
           return NextResponse.json({
             success: true,

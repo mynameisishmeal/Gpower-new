@@ -9,6 +9,7 @@ export interface SessionData {
   role: string;
   firstname?: string;
   lastname?: string;
+  permissions?: Record<string, boolean>;
 }
 
 export async function createSession(data: SessionData): Promise<string> {
@@ -37,7 +38,7 @@ export async function setSessionCookie(token: string) {
   const cookieStore = await cookies();
   cookieStore.set('session', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: false, // Desktop app runs locally over http://127.0.0.1
     sameSite: 'lax',
     maxAge: 60 * 60 * 24
   });

@@ -9,6 +9,7 @@ export async function POST(request: NextRequest) {
     await dbConnect();
     
     const { email, password } = await request.json();
+    console.log(`[Auth API] Login request received for: ${email}`);
 
     if (!email || !password) {
       return NextResponse.json<ApiResponse>({
@@ -39,12 +40,11 @@ export async function POST(request: NextRequest) {
       email: user.email,
       role: user.role,
       firstname: user.firstname,
-      lastname: user.lastname
+      lastname: user.lastname,
+      permissions: user.permissions
     });
 
-    await setSessionCookie(token);
-
-    return NextResponse.json<ApiResponse>({
+    const response = NextResponse.json<ApiResponse>({
       success: true,
       message: 'Login successful',
       data: {
@@ -52,9 +52,20 @@ export async function POST(request: NextRequest) {
         email: user.email,
         role: user.role,
         firstname: user.firstname,
-        lastname: user.lastname
+        lastname: user.lastname,
+        permissions: user.permissions
       }
     });
+
+    response.cookies.set('session', token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24,
+      path: '/'
+    });
+
+    return response;
 
   } catch (error: any) {
     console.error('Login error:', error);

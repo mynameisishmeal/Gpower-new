@@ -14,10 +14,37 @@ export default function Navigation() {
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
-      const user = JSON.parse(userData);
-      setRole(user.role || '');
-      setPermissions(user.permissions || {});
+      try {
+        const user = JSON.parse(userData);
+        setRole(user.role || '');
+        setPermissions(user.permissions || {});
+      } catch {}
     }
+
+    // Live sync permissions from server so Super Admin changes apply immediately
+    fetch('/api/auth/me')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((freshUser) => {
+        if (freshUser && freshUser.role) {
+          setRole(freshUser.role);
+          setPermissions(freshUser.permissions || {});
+          const local = localStorage.getItem('user');
+          if (local) {
+            try {
+              const parsed = JSON.parse(local);
+              localStorage.setItem(
+                'user',
+                JSON.stringify({
+                  ...parsed,
+                  role: freshUser.role,
+                  permissions: freshUser.permissions || {}
+                })
+              );
+            } catch {}
+          }
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const handleLogout = () => {
@@ -42,27 +69,33 @@ export default function Navigation() {
     <nav className="glass sticky top-0 z-50 border-b border-gray-200">
       <div className="max-w-full mx-auto px-4">
         <div className="flex h-16 items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Package className="h-6 w-6 text-blue-600" />
-            <span className="text-xl font-bold text-gray-900">Gpower CRM</span>
+          <div className="flex items-center gap-2.5">
+            <img src="/logo.png" alt="Gpower CRM Logo" className="h-8 w-8 rounded-lg object-contain" />
+            <span className="text-xl font-bold text-gray-900 tracking-tight">Gpower CRM</span>
           </div>
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1 flex-wrap">
-            <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
-              <Home className="h-4 w-4" />
-              <span>Dashboard</span>
-            </Link>
+            {(role === 'sadmin' || permissions.canViewDashboard !== false) && (
+              <Link href="/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
+                <Home className="h-4 w-4" />
+                <span>Dashboard</span>
+              </Link>
+            )}
             
-            <Link href="/sell/mixed" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
-              <ShoppingCart className="h-4 w-4" />
-              <span>Sell</span>
-            </Link>
+            {(role === 'sadmin' || permissions.canSell !== false) && (
+              <Link href="/sell/mixed" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
+                <ShoppingCart className="h-4 w-4" />
+                <span>Sell</span>
+              </Link>
+            )}
             
-            <Link href="/sales/history" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
-              <BarChart3 className="h-4 w-4" />
-              <span>Sales</span>
-            </Link>
+            {(role === 'sadmin' || permissions.canViewSales !== false) && (
+              <Link href="/sales/history" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
+                <BarChart3 className="h-4 w-4" />
+                <span>Sales</span>
+              </Link>
+            )}
             
             {(role === 'sadmin' || permissions.canViewInventory) && (
               <div className="relative group">
@@ -167,19 +200,21 @@ export default function Navigation() {
               </Link>
             )}
 
-            {(role === 'sadmin' || permissions.canManageUsers) && role !== 'sadmin' && (
+            {role !== 'sadmin' && permissions.canManageUsers === true && (
               <Link href="/users" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
                 <Users className="h-4 w-4" />
                 <span>Users</span>
               </Link>
             )}
             
-            <Link href="/printers" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
-              <Printer className="h-4 w-4" />
-              <span>Printer</span>
-            </Link>
+            {(role === 'sadmin' || permissions.canManagePrinters !== false) && (
+              <Link href="/printers" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
+                <Printer className="h-4 w-4" />
+                <span>Printer</span>
+              </Link>
+            )}
             
-            {role !== 'sadmin' && (
+            {role !== 'sadmin' && permissions.canViewSettings !== false && (
               <Link href="/settings/profile" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
                 <Settings className="h-4 w-4" />
                 <span>Settings</span>
@@ -209,20 +244,26 @@ export default function Navigation() {
           <div className="md:hidden fixed inset-0 top-16 bg-white z-40 overflow-y-auto">
             <div className="py-4 px-4">
             <div className="flex flex-col space-y-2">
-              <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
-                <Home className="h-4 w-4" />
-                <span>Dashboard</span>
-              </Link>
+              {(role === 'sadmin' || permissions.canViewDashboard !== false) && (
+                <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
+                  <Home className="h-4 w-4" />
+                  <span>Dashboard</span>
+                </Link>
+              )}
               
-              <Link href="/sell/mixed" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
-                <ShoppingCart className="h-4 w-4" />
-                <span>Sell</span>
-              </Link>
+              {(role === 'sadmin' || permissions.canSell !== false) && (
+                <Link href="/sell/mixed" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
+                  <ShoppingCart className="h-4 w-4" />
+                  <span>Sell</span>
+                </Link>
+              )}
               
-              <Link href="/sales/history" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
-                <BarChart3 className="h-4 w-4" />
-                <span>Sales</span>
-              </Link>
+              {(role === 'sadmin' || permissions.canViewSales !== false) && (
+                <Link href="/sales/history" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
+                  <BarChart3 className="h-4 w-4" />
+                  <span>Sales</span>
+                </Link>
+              )}
               
               {(role === 'sadmin' || permissions.canViewInventory) && (
                 <>
@@ -295,19 +336,21 @@ export default function Navigation() {
                 </Link>
               )}
 
-              {(role === 'sadmin' || permissions.canManageUsers) && role !== 'sadmin' && (
+              {role !== 'sadmin' && permissions.canManageUsers === true && (
                 <Link href="/users" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
                   <Users className="h-4 w-4" />
                   <span>Users</span>
                 </Link>
               )}
               
-              <Link href="/printers" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
-                <Printer className="h-4 w-4" />
-                <span>Printer</span>
-              </Link>
+              {(role === 'sadmin' || permissions.canManagePrinters !== false) && (
+                <Link href="/printers" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
+                  <Printer className="h-4 w-4" />
+                  <span>Printer</span>
+                </Link>
+              )}
               
-              {role !== 'sadmin' && (
+              {role !== 'sadmin' && permissions.canViewSettings !== false && (
                 <Link href="/settings/profile" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-all text-gray-700 font-medium">
                   <Settings className="h-4 w-4" />
                   <span>Settings</span>

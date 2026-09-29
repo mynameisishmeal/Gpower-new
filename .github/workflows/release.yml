@@ -1,0 +1,62 @@
+name: Release Electron Desktop App
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: 'Release Tag (e.g. v0.1.1)'
+        required: false
+        default: ''
+
+jobs:
+  build:
+    name: Build & Release Windows Installer
+    runs-on: windows-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure .env.local
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.ENV_LOCAL }}" ]; then
+            echo "${{ secrets.ENV_LOCAL }}" > .env.local
+          else
+            cat << 'EOF' > .env.local
+          MONGODB_URI=${{ secrets.MONGODB_URI }}
+          ONLINE_URI=${{ secrets.ONLINE_URI || secrets.MONGODB_URI }}
+          NEXTAUTH_URL=http://localhost:3000
+          NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET || 'gpower-production-secret-key-2026' }}
+          PORT=3000
+          ADMIN_ROLE=admin
+          SUPER_ADMIN_ROLE=sadmin
+          WORKER_ROLE=worker
+          EOF
+          fi
+
+      - name: Build Next.js
+        run: npm run build
+        env:
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET || 'gpower-production-secret-key-2026' }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+
+      - name: Package & Publish to GitHub Releases
+        run: npx electron-builder --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

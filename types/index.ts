@@ -9,6 +9,10 @@ export interface IUser {
   phonenumber?: string;
   role: 'sadmin' | 'admin' | 'worker';
   permissions?: {
+    canViewDashboard?: boolean;
+    canSell?: boolean;
+    canViewSales?: boolean;
+    canManageReceipts?: boolean;
     canViewInventory?: boolean;
     canManageInventory?: boolean;
     canViewCustomers?: boolean;
@@ -17,6 +21,8 @@ export interface IUser {
     canManageFinance?: boolean;
     canViewAnalytics?: boolean;
     canManageUsers?: boolean;
+    canManagePrinters?: boolean;
+    canViewSettings?: boolean;
   };
   city?: string;
   birthday?: number;

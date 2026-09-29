@@ -5,7 +5,10 @@ import Customer from '@/models/Customer';
 export async function GET() {
   try {
     await dbConnect();
-    const customers = await Customer.find({});
+    const customers = await Customer.find({})
+      .select('name email phone address')
+      .sort({ name: 1 })
+      .lean();
     return NextResponse.json({ customers });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch customers' }, { status: 500 });

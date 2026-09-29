@@ -2,12 +2,14 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
+import { getSession } from '@/lib/auth/session';
 
 export async function GET() {
   try {
     await dbConnect();
+    const session = await getSession();
     const cookieStore = await cookies();
-    const userId = cookieStore.get('userId')?.value;
+    const userId = session?.userId || cookieStore.get('userId')?.value;
 
     if (!userId) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });

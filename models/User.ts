@@ -10,6 +10,10 @@ const UserSchema = new Schema<IUser>({
   phonenumber: { type: String },
   role: { type: String, enum: ['sadmin', 'admin', 'worker'], default: 'worker' },
   permissions: {
+    canViewDashboard: { type: Boolean, default: true },
+    canSell: { type: Boolean, default: true },
+    canViewSales: { type: Boolean, default: true },
+    canManageReceipts: { type: Boolean, default: false },
     canViewInventory: { type: Boolean, default: false },
     canManageInventory: { type: Boolean, default: false },
     canViewCustomers: { type: Boolean, default: false },
@@ -17,7 +21,9 @@ const UserSchema = new Schema<IUser>({
     canViewFinance: { type: Boolean, default: false },
     canManageFinance: { type: Boolean, default: false },
     canViewAnalytics: { type: Boolean, default: false },
-    canManageUsers: { type: Boolean, default: false }
+    canManageUsers: { type: Boolean, default: false },
+    canManagePrinters: { type: Boolean, default: true },
+    canViewSettings: { type: Boolean, default: true }
   },
   city: { type: String },
   birthday: { type: Number },

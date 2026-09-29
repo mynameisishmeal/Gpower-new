@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import UpdateChecker from "@/components/UpdateChecker";
+import DbStatusIndicator from "@/components/DbStatusIndicator";
 
 export const metadata: Metadata = {
   title: "Gpower CRM",
@@ -15,6 +17,8 @@ export default function RootLayout({
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <main className="flex-1">{children}</main>
+        <DbStatusIndicator />
+        <UpdateChecker />
       </body>
     </html>
   );

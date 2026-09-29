@@ -48,7 +48,12 @@ export default function SellMixedPage() {
     storeName: 'GPOWER CRM',
     storeAddress: '',
     receiptFooter: 'Thank you!',
-    receiptDisclaimer: ''
+    receiptDisclaimer: '',
+    showDateTime: true,
+    showSeller: true,
+    showCustomer: true,
+    showDiscount: true,
+    showPaymentMethod: true
   });
   const [paymentMethods, setPaymentMethods] = useState({
     cash: { checked: false, amount: '' },
@@ -155,7 +160,12 @@ export default function SellMixedPage() {
         storeName: data.settings.storeName || 'GPOWER CRM',
         storeAddress: data.settings.storeAddress || '',
         receiptFooter: data.settings.receiptFooter || 'Thank you!',
-        receiptDisclaimer: data.settings.receiptDisclaimer || ''
+        receiptDisclaimer: data.settings.receiptDisclaimer || '',
+        showDateTime: data.settings.showDateTime ?? true,
+        showSeller: data.settings.showSeller ?? true,
+        showCustomer: data.settings.showCustomer ?? true,
+        showDiscount: data.settings.showDiscount ?? true,
+        showPaymentMethod: data.settings.showPaymentMethod ?? true
       });
     }
   };
@@ -272,6 +282,7 @@ export default function SellMixedPage() {
     const displayHours = hours % 12 || 12;
     const currentTime = `${displayHours}:${minutes} ${ampm}`;
     const currentDate = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+    const seller = localStorage.getItem('userEmail') || 'Unknown';
 
     let receipt = '\n================================\n';
     receipt += `       ${receiptSettings.storeName}\n`;
@@ -279,10 +290,19 @@ export default function SellMixedPage() {
       receipt += `${receiptSettings.storeAddress}\n`;
     }
     receipt += '================================\n';
-    receipt += `Date: ${currentDate}\n`;
-    receipt += `Time: ${currentTime}\n`;
+    
+    if (receiptSettings.showDateTime) {
+      receipt += `Date: ${currentDate}\n`;
+      receipt += `Time: ${currentTime}\n`;
+    }
+    
+    if (receiptSettings.showSeller) {
+      receipt += `Seller: ${seller}\n`;
+    }
+    
     receipt += '================================\n\n';
-    if (customerName) {
+    
+    if (receiptSettings.showCustomer && customerName) {
       receipt += `Customer: ${customerName}\n\n`;
     }
     receipt += 'ITEMS:\n';
@@ -296,20 +316,21 @@ export default function SellMixedPage() {
     
     receipt += '--------------------------------\n';
     receipt += `Subtotal: N${subtotal.toLocaleString()}\n`;
-    if (discount && parseFloat(discount) > 0) {
+    if (receiptSettings.showDiscount && discount && parseFloat(discount) > 0) {
       receipt += `Discount: -N${parseFloat(discount).toLocaleString()}\n`;
     }
     receipt += `TOTAL: N${total.toLocaleString()}\n`;
     receipt += '================================\n';
     
-    receipt += '\nPAYMENT:\n';
-    Object.entries(paymentMethods).forEach(([method, pm]) => {
-      if (pm.checked && Number(pm.amount) > 0) {
-        receipt += `${method.toUpperCase()}: N${Number(pm.amount).toLocaleString()}\n`;
-      }
-    });
-    
-    receipt += '\n================================\n';
+    if (receiptSettings.showPaymentMethod) {
+      receipt += '\nPAYMENT:\n';
+      Object.entries(paymentMethods).forEach(([method, pm]) => {
+        if (pm.checked && Number(pm.amount) > 0) {
+          receipt += `${method.toUpperCase()}: N${Number(pm.amount).toLocaleString()}\n`;
+        }
+      });
+      receipt += '\n================================\n';
+    }
     receipt += `     ${receiptSettings.receiptFooter}\n`;
     if (receiptSettings.receiptDisclaimer) {
       receipt += '--------------------------------\n';
