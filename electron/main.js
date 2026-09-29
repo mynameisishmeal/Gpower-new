@@ -5,6 +5,10 @@ const fs = require('fs');
 const { initAutoUpdater, setupUpdaterIpc } = require('./updater');
 const { startNextServer, checkPortAvailable, loadEnvironment, logToFile } = require('./server');
 
+// Enable Chromium Web Bluetooth flags for Electron
+app.commandLine.appendSwitch('enable-web-bluetooth', 'true');
+app.commandLine.appendSwitch('enable-experimental-web-platform-features', 'true');
+
 process.on('uncaughtException', (err) => {
   const msg = `[CRITICAL UNCAUGHT EXCEPTION] ${err?.stack || err}`;
   console.error(msg);
@@ -28,6 +32,7 @@ if (!gotTheLock) {
 let mainWindow = null;
 let splashWindow = null;
 let nextServerInstance = null;
+let bluetoothSelectCallback = null;
 
 const isDev = !app.isPackaged && process.env.NODE_ENV !== 'production';
 const APP_DIR = path.join(__dirname, '..');
@@ -113,15 +118,25 @@ function createMainWindow(loadUrl) {
     return { action: 'allow' };
   });
 
-  // Web Bluetooth Device Selection handler (for thermal Bluetooth printers)
-  mainWindow.webContents.session.on('select-bluetooth-device', (event, deviceList, callback) => {
+  // Web Bluetooth Device Selection handler (discovers thermal Bluetooth printers)
+  mainWindow.webContents.on('select-bluetooth-device', (event, deviceList, callback) => {
     event.preventDefault();
-    console.log('[Electron Bluetooth] Devices discovered:', deviceList.map(d => d.deviceName));
-    if (deviceList && deviceList.length > 0) {
-      // Connect to the first discovered printer/device
-      callback(deviceList[0].deviceId);
+    bluetoothSelectCallback = callback;
+    console.log('[Electron Bluetooth] Discovered devices:', deviceList.map(d => ({ name: d.deviceName, id: d.deviceId })));
+
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('bluetooth:devices-found', deviceList);
+    }
+  });
+
+  // Handle Windows Bluetooth pairing (PIN entry for receipt printers)
+  mainWindow.webContents.session.setBluetoothPairingHandler((details, callback) => {
+    console.log('[Electron Bluetooth] Pairing request received:', details.deviceName, details.pairingKind);
+    if (details.pairingKind === 'providePin') {
+      // Standard thermal receipt printer PINs: '0000' or '1234'
+      callback({ confirmed: true, pin: '0000' });
     } else {
-      callback('');
+      callback({ confirmed: true });
     }
   });
 
@@ -197,6 +212,23 @@ function setupWindowIpc() {
 
   ipcMain.handle('window:close', () => {
     if (mainWindow) mainWindow.close();
+  });
+
+  // Bluetooth device selection from custom UI
+  ipcMain.on('bluetooth:select-device', (event, deviceId) => {
+    console.log('[Electron Bluetooth] Device selected by user:', deviceId);
+    if (bluetoothSelectCallback) {
+      bluetoothSelectCallback(deviceId);
+      bluetoothSelectCallback = null;
+    }
+  });
+
+  ipcMain.on('bluetooth:cancel', () => {
+    console.log('[Electron Bluetooth] Selection cancelled by user');
+    if (bluetoothSelectCallback) {
+      bluetoothSelectCallback('');
+      bluetoothSelectCallback = null;
+    }
   });
 }
 

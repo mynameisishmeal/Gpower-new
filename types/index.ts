@@ -140,3 +140,26 @@ export interface ISalesSummary {
     revenue: number;
   }>;
 }
+
+// Electron API Types
+export interface ElectronAPI {
+  isElectron: boolean;
+  platform?: string;
+  getVersion: () => Promise<string>;
+  checkForUpdates: () => Promise<{ success: boolean; error?: string; result?: any }>;
+  startDownload: () => Promise<{ success: boolean; error?: string }>;
+  installUpdate: () => void;
+  onUpdateStatus: (callback: (data: any) => void) => () => void;
+  onBluetoothDevicesFound?: (callback: (devices: any[]) => void) => () => void;
+  selectBluetoothDevice?: (deviceId: string) => void;
+  cancelBluetoothDevice?: () => void;
+  minimizeWindow?: () => Promise<void>;
+  maximizeWindow?: () => Promise<void>;
+  closeWindow?: () => Promise<void>;
+}
+
+declare global {
+  interface Window {
+    electronAPI?: ElectronAPI;
+  }
+}

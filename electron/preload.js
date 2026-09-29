@@ -22,5 +22,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Window controls (optional minimize/maximize/close)
   minimizeWindow: () => ipcRenderer.invoke('window:minimize'),
   maximizeWindow: () => ipcRenderer.invoke('window:maximize'),
-  closeWindow: () => ipcRenderer.invoke('window:close')
+  closeWindow: () => ipcRenderer.invoke('window:close'),
+
+  // Web Bluetooth Device Chooser (for thermal receipt printers)
+  onBluetoothDevicesFound: (callback) => {
+    const handler = (_event, deviceList) => callback(deviceList);
+    ipcRenderer.on('bluetooth:devices-found', handler);
+    return () => ipcRenderer.removeListener('bluetooth:devices-found', handler);
+  },
+  selectBluetoothDevice: (deviceId) => ipcRenderer.send('bluetooth:select-device', deviceId),
+  cancelBluetoothDevice: () => ipcRenderer.send('bluetooth:cancel')
 });

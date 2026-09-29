@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import UpdateChecker from "@/components/UpdateChecker";
 import DbStatusIndicator from "@/components/DbStatusIndicator";
+import BluetoothChooserModal from "@/components/BluetoothChooserModal";
 
 export const metadata: Metadata = {
   title: "Gpower CRM",
@@ -19,6 +20,7 @@ export default function RootLayout({
         <main className="flex-1">{children}</main>
         <DbStatusIndicator />
         <UpdateChecker />
+        <BluetoothChooserModal />
       </body>
     </html>
   );

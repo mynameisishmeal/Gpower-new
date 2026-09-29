@@ -35,9 +35,19 @@ export class BluetoothPrinter {
     try {
       console.log('Requesting Bluetooth device with service UUID:', this.serviceUUID);
       
-      globalBluetoothDevice = await (navigator as any).bluetooth.requestDevice({
-        filters: [{ services: [this.serviceUUID] }]
-      });
+      const requestOptions: any = {
+        acceptAllDevices: true,
+        optionalServices: [
+          this.serviceUUID,
+          'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+          '000018f0-0000-1000-8000-00805f9b34fb',
+          '49535343-fe7d-4ae5-8fa9-9fafd205e455',
+          '0000ff00-0000-1000-8000-00805f9b34fb',
+          '0000180a-0000-1000-8000-00805f9b34fb'
+        ]
+      };
+
+      globalBluetoothDevice = await (navigator as any).bluetooth.requestDevice(requestOptions);
 
       console.log('Device selected:', globalBluetoothDevice.name);
 

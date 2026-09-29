@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Home, ShoppingCart, Package, Users, BarChart3, Settings, UserPlus, ChevronDown, Printer, Menu, X, LogOut, CreditCard, TrendingDown, Bell, Receipt, Shield } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import UpdateNavTab from '@/components/UpdateNavTab';
 
 export default function Navigation() {
   const router = useRouter();
@@ -220,6 +221,8 @@ export default function Navigation() {
                 <span>Settings</span>
               </Link>
             )}
+            
+            <UpdateNavTab />
 
             <button 
               onClick={handleLogout}
@@ -356,6 +359,8 @@ export default function Navigation() {
                   <span>Settings</span>
                 </Link>
               )}
+
+              <UpdateNavTab />
 
               <button 
                 onClick={() => { setMobileMenuOpen(false); handleLogout(); }}

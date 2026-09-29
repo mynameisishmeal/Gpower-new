@@ -9,20 +9,6 @@ interface UpdateStatus {
   percent?: number;
   message?: string;
 }
-interface ElectronAPI {
-  isElectron: boolean;
-  getVersion: () => Promise<string>;
-  checkForUpdates: () => Promise<{ success: boolean }>;
-  startDownload: () => Promise<{ success: boolean }>;
-  installUpdate: () => void;
-  onUpdateStatus: (callback: (data: UpdateStatus) => void) => () => void;
-}
-
-declare global {
-  interface Window {
-    electronAPI?: ElectronAPI;
-  }
-}
 
 export default function UpdateChecker() {
   const [isElectron, setIsElectron] = useState(false);
