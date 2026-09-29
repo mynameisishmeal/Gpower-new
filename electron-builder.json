@@ -23,6 +23,7 @@
   ],
   "asar": false,
   "win": {
+    "artifactName": "Gpower-CRM-Setup-${version}.${ext}",
     "target": [
       {
         "target": "nsis",
