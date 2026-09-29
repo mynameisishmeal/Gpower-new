@@ -46,9 +46,19 @@ function initAutoUpdater(mainWindow) {
 
   autoUpdater.on('error', (err) => {
     console.error('[AutoUpdater] Error:', err);
-    sendStatusToWindow('error', {
-      message: err == null ? 'Unknown update error' : (err.message || err).toString()
-    });
+    const msg = err == null ? '' : (err.message || err).toString();
+    if (
+      msg.includes('406') ||
+      msg.includes('404') ||
+      msg.includes('Cannot parse releases feed') ||
+      msg.includes('Unable to find latest version') ||
+      msg.includes('No published versions') ||
+      msg.includes('ENOENT')
+    ) {
+      console.warn('[AutoUpdater] No published release found on GitHub yet. Suppressing UI popup.');
+      return;
+    }
+    sendStatusToWindow('error', { message: msg });
   });
 
   autoUpdater.on('download-progress', (progressObj) => {

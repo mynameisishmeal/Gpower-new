@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Download, RefreshCw, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { Download, RefreshCw, CheckCircle2, X } from 'lucide-react';
 
 interface UpdateStatus {
   status: 'checking' | 'available' | 'not-available' | 'downloading' | 'downloaded' | 'error';
@@ -60,8 +60,8 @@ export default function UpdateChecker() {
     window.electronAPI?.installUpdate();
   };
 
-  // Only show floating card when downloading or downloaded or manual check
-  if (updateInfo.status === 'not-available') {
+  // Only show floating card when an update is actively available, downloading, or downloaded
+  if (updateInfo.status === 'not-available' || updateInfo.status === 'checking' || updateInfo.status === 'error') {
     return null;
   }
 
@@ -77,9 +77,6 @@ export default function UpdateChecker() {
           )}
           {updateInfo.status === 'available' && (
             <Download className="w-5 h-5 text-indigo-400 flex-shrink-0" />
-          )}
-          {updateInfo.status === 'error' && (
-            <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0" />
           )}
           
           <div>
