@@ -129,7 +129,7 @@ export default function UsersPage() {
       <Navigation />
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="card-shadow bg-white rounded-xl p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200/80 p-6">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-3">
                 <Users className="h-8 w-8 text-blue-600" />
@@ -137,7 +137,7 @@ export default function UsersPage() {
               </div>
               <button 
                 onClick={() => router.push('/users/create')}
-                className="btn-modern bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 flex items-center gap-2"
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 shadow-sm hover:shadow flex items-center gap-2 transition-all"
               >
                 <UserPlus className="h-5 w-5" />
                 Add User
@@ -159,7 +159,7 @@ export default function UsersPage() {
                 <div className="mb-4 text-sm text-gray-600">
                   Showing {users.length} user{users.length !== 1 ? 's' : ''}
                 </div>
-                <table className="w-full table-modern">
+                <table className="w-full border-separate border-spacing-0 rounded-lg overflow-hidden">
                   <thead>
                     <tr className="bg-gray-50">
                       <th className="p-3 text-left font-semibold text-gray-700">Name</th>

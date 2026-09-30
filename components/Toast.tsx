@@ -28,7 +28,7 @@ export function Toast({ message, type, onClose }: ToastProps) {
   };
 
   return (
-    <div className={`${colors[type]} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px] animate-slide-in`}>
+    <div className={`${colors[type]} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px] animate-in fade-in slide-in-from-right duration-300`}>
       {icons[type]}
       <span className="flex-1 font-medium">{message}</span>
       <button onClick={onClose} className="hover:bg-white/20 rounded p-1">

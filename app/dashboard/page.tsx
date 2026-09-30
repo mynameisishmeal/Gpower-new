@@ -89,11 +89,11 @@ export default function DashboardPage() {
               </p>
             </div>
             <div className="flex gap-3">
-              <Link href="/sell/mixed" className="btn-modern bg-blue-600 text-white px-4 md:px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 flex items-center gap-2 text-sm md:text-base">
+              <Link href="/sell/mixed" className="bg-blue-600 text-white px-4 md:px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 shadow-sm hover:shadow flex items-center gap-2 text-sm md:text-base transition-all">
                 <Plus className="h-5 w-5" />
                 New Sale
               </Link>
-              <button onClick={handleLogout} className="btn-modern bg-white text-gray-700 px-4 md:px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 border border-gray-300 flex items-center gap-2 text-sm md:text-base">
+              <button onClick={handleLogout} className="bg-white text-gray-700 px-4 md:px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 border border-gray-300 shadow-sm hover:shadow flex items-center gap-2 text-sm md:text-base transition-all">
                 <LogOut className="h-5 w-5" />
                 Logout
               </button>
@@ -108,7 +108,7 @@ export default function DashboardPage() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="card-shadow bg-white rounded-xl p-6 animate-pulse">
+              <div key={i} className="bg-white rounded-xl p-6 shadow-sm border border-slate-200/80 animate-pulse">
                 <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
                 <div className="h-10 bg-gray-200 rounded w-3/4 mb-4"></div>
                 <div className="h-3 bg-gray-200 rounded w-full"></div>
@@ -117,7 +117,7 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="card-shadow bg-white rounded-xl p-6 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+          <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-slate-200/80">
             <div className="flex justify-between items-start mb-4">
               <p className="text-sm text-blue-600 font-semibold uppercase tracking-wide">Today's Sales</p>
               <span className="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full font-bold">Live</span>
@@ -135,7 +135,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="card-shadow bg-white rounded-xl p-6 animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+          <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-slate-200/80">
             <div className="flex justify-between items-start mb-4">
               <p className="text-sm text-blue-600 font-semibold uppercase tracking-wide">Products Sold</p>
             </div>
@@ -146,7 +146,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="card-shadow bg-white rounded-xl p-6 animate-fade-in-up" style={{animationDelay: '0.3s'}}>
+          <div className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-slate-200/80">
             <div className="flex justify-between items-start mb-4">
               <p className="text-sm text-blue-600 font-semibold uppercase tracking-wide">Active Users</p>
             </div>
@@ -157,7 +157,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <Link href="/stock?filter=low" className="card-shadow bg-white rounded-xl p-6 animate-fade-in-up hover:shadow-xl transition-shadow cursor-pointer" style={{animationDelay: '0.4s'}}>
+          <Link href="/stock?filter=low" className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-slate-200/80 cursor-pointer">
             <div className="flex justify-between items-start mb-4">
               <p className="text-sm text-orange-600 font-semibold uppercase tracking-wide">Low Stock</p>
               <AlertTriangle className="h-5 w-5 text-orange-600" />
@@ -172,28 +172,28 @@ export default function DashboardPage() {
         )}
 
         {/* Quick Actions */}
-        <div className="card-shadow bg-white rounded-xl animate-fade-in-up" style={{animationDelay: '0.5s'}}>
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200/80">
           <div className="border-b border-gray-200 px-6 py-4">
             <h3 className="text-xl font-bold text-gray-900">Quick Actions</h3>
           </div>
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Link href="/sell/mixed" className="btn-modern bg-blue-600 text-white rounded-xl p-6 md:p-8 flex flex-col items-center justify-center gap-4 hover:bg-blue-700 group">
+              <Link href="/sell/mixed" className="bg-blue-600 text-white rounded-xl p-6 md:p-8 flex flex-col items-center justify-center gap-4 hover:bg-blue-700 shadow-sm hover:shadow-md group transition-all">
                 <ShoppingCart className="h-8 md:h-10 w-8 md:w-10 group-hover:scale-110 transition-transform" />
                 <span className="font-bold text-base md:text-lg">New Sale</span>
               </Link>
 
-              <Link href="/products" className="btn-modern border-2 border-blue-600 text-blue-600 rounded-xl p-6 md:p-8 flex flex-col items-center justify-center gap-4 hover:bg-blue-50 group">
+              <Link href="/products" className="border-2 border-blue-600 text-blue-600 rounded-xl p-6 md:p-8 flex flex-col items-center justify-center gap-4 hover:bg-blue-50 shadow-sm hover:shadow-md group transition-all">
                 <Package className="h-8 md:h-10 w-8 md:w-10 group-hover:scale-110 transition-transform" />
                 <span className="font-bold text-base md:text-lg">Products</span>
               </Link>
 
-              <Link href="/sales/history" className="btn-modern border-2 border-blue-600 text-blue-600 rounded-xl p-6 md:p-8 flex flex-col items-center justify-center gap-4 hover:bg-blue-50 group">
+              <Link href="/sales/history" className="border-2 border-blue-600 text-blue-600 rounded-xl p-6 md:p-8 flex flex-col items-center justify-center gap-4 hover:bg-blue-50 shadow-sm hover:shadow-md group transition-all">
                 <TrendingUp className="h-8 md:h-10 w-8 md:w-10 group-hover:scale-110 transition-transform" />
                 <span className="font-bold text-base md:text-lg">Sales History</span>
               </Link>
 
-              <Link href="/users" className="btn-modern border-2 border-blue-600 text-blue-600 rounded-xl p-6 md:p-8 flex flex-col items-center justify-center gap-4 hover:bg-blue-50 group">
+              <Link href="/users" className="border-2 border-blue-600 text-blue-600 rounded-xl p-6 md:p-8 flex flex-col items-center justify-center gap-4 hover:bg-blue-50 shadow-sm hover:shadow-md group transition-all">
                 <Users className="h-8 md:h-10 w-8 md:w-10 group-hover:scale-110 transition-transform" />
                 <span className="font-bold text-base md:text-lg">Users</span>
               </Link>

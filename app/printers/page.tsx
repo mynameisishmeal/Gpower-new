@@ -59,7 +59,7 @@ export default function PrintersPage() {
       <Navigation />
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="card-shadow bg-white rounded-xl p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200/80 p-6">
             <div className="flex items-center gap-3 mb-6">
               <Printer className="h-8 w-8 text-blue-600" />
               <h1 className="text-3xl font-bold text-gray-900">Available Printers</h1>
@@ -79,8 +79,8 @@ export default function PrintersPage() {
                 {printers.map((printer) => (
                   <div
                     key={printer._id}
-                    className={`card-shadow rounded-lg p-6 ${
-                      printer.isOwned ? 'bg-green-50 border-2 border-green-500' : 'bg-white'
+                    className={`rounded-lg p-6 shadow-sm border transition-shadow ${
+                      printer.isOwned ? 'bg-green-50 border-green-500' : 'bg-white border-slate-200/80 hover:shadow-md'
                     }`}
                   >
                     <div className="flex items-start justify-between mb-4">
@@ -115,7 +115,7 @@ export default function PrintersPage() {
                       {!printer.isOwned && printer.serviceUUID && printer.characteristicUUID && (
                         <button
                           onClick={() => clonePrinter(printer._id)}
-                          className="w-full mt-4 btn-modern bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 flex items-center justify-center gap-2"
+                          className="w-full mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 shadow-sm hover:shadow flex items-center justify-center gap-2 transition-all"
                         >
                           <Copy className="h-4 w-4" />
                           Clone This Printer
