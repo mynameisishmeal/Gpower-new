@@ -9,6 +9,7 @@ export default function CreateUserPage() {
   const router = useRouter();
   const { showToast, ToastContainer } = useToast();
   const [authorized, setAuthorized] = useState(false);
+  const [currentUserRole, setCurrentUserRole] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -30,6 +31,7 @@ export default function CreateUserPage() {
         return;
       }
       setAuthorized(true);
+      setCurrentUserRole(userData.role || '');
     } catch {
       router.push('/login');
     }
@@ -81,18 +83,25 @@ export default function CreateUserPage() {
     
     setLoading(true);
     try {
+      const rawUser = localStorage.getItem('user');
+      const userData = rawUser ? JSON.parse(rawUser) : null;
+      const requesterEmail = userData?.email || '';
+
       const res = await fetch('/api/users/create', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-email': requesterEmail
+        },
+        body: JSON.stringify({ ...formData, requesterEmail })
       });
       
       if (res.ok) {
         showToast('User created successfully!', 'success');
         setTimeout(() => router.push('/users'), 1000);
       } else {
-        const data = await res.json();
-        showToast(data.message || 'Failed to create user', 'error');
+        const data = await res.json().catch(() => ({}));
+        showToast(data.error || data.message || 'Failed to create user', 'error');
       }
     } catch (error) {
       showToast('An error occurred', 'error');
@@ -263,7 +272,9 @@ export default function CreateUserPage() {
               <select required value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})} className="w-full px-4 py-3 border border-gray-300 rounded-lg">
                 <option value="worker">WORKER</option>
                 <option value="admin">ADMIN</option>
-                <option value="sadmin">SUPER ADMIN</option>
+                {currentUserRole === 'sadmin' && (
+                  <option value="sadmin">SUPER ADMIN</option>
+                )}
               </select>
             </div>
 

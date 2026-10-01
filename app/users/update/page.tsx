@@ -2,7 +2,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import Navigation from '@/components/Navigation';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Lock } from 'lucide-react';
 import { useToast } from '@/components/Toast';
 
 function UpdateUserForm() {
@@ -63,9 +63,24 @@ function UpdateUserForm() {
   const fetchUser = async () => {
     setFetchingUser(true);
     try {
-      const res = await fetch(`/api/users/get?id=${userId}`);
+      const rawUser = localStorage.getItem('user');
+      const userData = rawUser ? JSON.parse(rawUser) : null;
+      const requesterEmail = userData?.email || '';
+
+      const res = await fetch(`/api/users/get?id=${userId}&requesterEmail=${encodeURIComponent(requesterEmail)}`, {
+        headers: {
+          'x-user-email': requesterEmail
+        }
+      });
       const data = await res.json();
       if (data.user) {
+        // Prevent regular admin from viewing or editing Super Admin accounts
+        if (userData?.role !== 'sadmin' && data.user.role === 'sadmin') {
+          showToast('Access denied! Regular admins cannot view or edit Super Admin accounts.', 'error');
+          setTimeout(() => router.push('/users'), 1500);
+          return;
+        }
+
         setFormData({
           firstname: data.user.firstname || '',
           lastname: data.user.lastname || '',
@@ -98,7 +113,7 @@ function UpdateUserForm() {
       newErrors.emailconfirmation = 'Emails do not match';
     }
     
-    if (formData.password !== formData.passwordconfirmation) {
+    if (formData.password && formData.password !== formData.passwordconfirmation) {
       newErrors.passwordconfirmation = 'Passwords do not match';
     }
     
@@ -116,18 +131,25 @@ function UpdateUserForm() {
     
     setLoading(true);
     try {
+      const rawUser = localStorage.getItem('user');
+      const userData = rawUser ? JSON.parse(rawUser) : null;
+      const requesterEmail = userData?.email || '';
+
       const res = await fetch(`/api/users/update`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: userId, ...formData })
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-email': requesterEmail
+        },
+        body: JSON.stringify({ id: userId, ...formData, requesterEmail })
       });
       
       if (res.ok) {
         showToast('User updated successfully!', 'success');
         setTimeout(() => router.push('/users'), 1000);
       } else {
-        const data = await res.json();
-        showToast(data.message || 'Failed to update user', 'error');
+        const data = await res.json().catch(() => ({}));
+        showToast(data.error || data.message || 'Failed to update user', 'error');
       }
     } catch (error) {
       showToast('An error occurred', 'error');
@@ -135,6 +157,11 @@ function UpdateUserForm() {
       setLoading(false);
     }
   };
+
+  // Super admin can see all passwords
+  // Regular admin can only view worker password
+  // Regular admin cannot see super admin password (or admin password)
+  const canViewPasswordInForm = currentUserRole === 'sadmin' || (currentUserRole === 'admin' && formData.role === 'worker');
 
   if (!authorized) {
     return (
@@ -198,42 +225,58 @@ function UpdateUserForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Password *</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Password {canViewPasswordInForm ? '*' : '(Protected - leave blank to keep)'}
+                </label>
                 <div className="relative">
                   <input 
                     type={showPassword ? "text" : "password"} 
-                    required 
                     value={formData.password} 
                     onChange={(e) => setFormData({...formData, password: e.target.value})} 
+                    placeholder={canViewPasswordInForm ? "Enter password" : "•••••••• (Protected)"}
                     className={`w-full px-4 py-3 border rounded-lg pr-10 ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                  >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
+                  {canViewPasswordInForm ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  ) : (
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" title="Password view is restricted">
+                      <Lock className="h-4 w-4" />
+                    </span>
+                  )}
                 </div>
                 {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Confirm Password *</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Confirm Password {canViewPasswordInForm ? '*' : '(Protected - leave blank to keep)'}
+                </label>
                 <div className="relative">
                   <input 
                     type={showConfirmPassword ? "text" : "password"} 
-                    required 
                     value={formData.passwordconfirmation} 
                     onChange={(e) => setFormData({...formData, passwordconfirmation: e.target.value})} 
+                    placeholder={canViewPasswordInForm ? "Confirm password" : "•••••••• (Protected)"}
                     className={`w-full px-4 py-3 border rounded-lg pr-10 ${errors.passwordconfirmation ? 'border-red-500' : 'border-gray-300'}`}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                  >
-                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
+                  {canViewPasswordInForm ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  ) : (
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" title="Password view is restricted">
+                      <Lock className="h-4 w-4" />
+                    </span>
+                  )}
                 </div>
                 {errors.passwordconfirmation && <p className="text-red-500 text-xs mt-1">{errors.passwordconfirmation}</p>}
               </div>

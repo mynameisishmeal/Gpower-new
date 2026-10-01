@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { Edit, Trash2, Package, Loader2, AlertTriangle, X, ShieldAlert } from 'lucide-react';
+import { Edit, Trash2, Package, Loader2, AlertTriangle, X, ShieldAlert, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import Navigation from '@/components/Navigation';
@@ -26,6 +26,7 @@ function StockContent() {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'low'>('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const filterParam = searchParams.get('filter');
@@ -90,9 +91,21 @@ function StockContent() {
     return stocks.filter((s: any) => s.stockquantity < 10).length;
   };
 
-  const filteredStocks = filter === 'low' 
-    ? stocks.filter((s: any) => s.stockquantity < 10)
-    : stocks;
+  const filteredStocks = stocks.filter((s: any) => {
+    if (filter === 'low' && s.stockquantity >= 10) {
+      return false;
+    }
+    if (!searchTerm.trim()) {
+      return true;
+    }
+    const term = searchTerm.toLowerCase().trim();
+    const nameMatch = s.stockname?.toLowerCase().includes(term);
+    const priceMatch = s.stockprice?.toString().includes(term);
+    const quantityMatch = s.stockquantity?.toString().includes(term);
+    const weightMatch = s.stockweight?.toString().includes(term);
+
+    return nameMatch || priceMatch || quantityMatch || weightMatch;
+  });
 
   if (authLoading) {
     return (
@@ -162,6 +175,44 @@ function StockContent() {
               </div>
             )}
 
+            {/* Search Bar */}
+            <div className="relative mb-6">
+              <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+              <input 
+                type="text"
+                placeholder="Search carton stock by name, price, quantity, or weight..."
+                className="w-full pl-11 pr-10 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm shadow-sm placeholder:text-gray-400"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100 cursor-pointer"
+                  title="Clear search"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Search feedback counter */}
+            {searchTerm && (
+              <div className="mb-4 flex items-center justify-between text-sm text-gray-600 bg-slate-50 px-4 py-2.5 rounded-lg border border-slate-200">
+                <span>
+                  Found <strong>{filteredStocks.length}</strong> carton stock item{filteredStocks.length !== 1 ? 's' : ''} matching &quot;<strong>{searchTerm}</strong>&quot;
+                  {filter === 'low' && ' (in low stock)'}
+                </span>
+                <button 
+                  onClick={() => setSearchTerm('')}
+                  className="text-xs text-blue-600 hover:text-blue-800 font-semibold hover:underline cursor-pointer"
+                >
+                  Clear search
+                </button>
+              </div>
+            )}
+
             {loading ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <Loader2 className="h-12 w-12 text-blue-600 animate-spin mb-4" />
@@ -170,34 +221,63 @@ function StockContent() {
             ) : filteredStocks.length === 0 ? (
               <div className="text-center py-12">
                 <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg mb-4">
-                  {filter === 'low' ? 'No low stock items found' : 'No stock items found'}
-                </p>
-                {filter === 'low' ? (
-                  <button
-                    onClick={() => setFilter('all')}
-                    className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 shadow-sm hover:shadow inline-flex items-center gap-2 transition-all cursor-pointer"
-                  >
-                    View All Stock
-                  </button>
-                ) : (
-                  canManage && (
-                    <Link
-                      href="/stock/add"
+                {searchTerm ? (
+                  <>
+                    <p className="text-gray-800 font-semibold text-lg mb-1">No matching stock items</p>
+                    <p className="text-gray-500 text-sm mb-4">
+                      No carton stock items match your search for &quot;{searchTerm}&quot;
+                      {filter === 'low' && ' in low stock'}
+                    </p>
+                    <div className="flex justify-center gap-3">
+                      <button
+                        onClick={() => setSearchTerm('')}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 shadow-sm transition-all text-sm inline-flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <X className="h-4 w-4" /> Clear Search
+                      </button>
+                      {filter === 'low' && (
+                        <button
+                          onClick={() => setFilter('all')}
+                          className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200 transition-all text-sm cursor-pointer"
+                        >
+                          View All Stock
+                        </button>
+                      )}
+                    </div>
+                  </>
+                ) : filter === 'low' ? (
+                  <>
+                    <p className="text-gray-500 text-lg mb-4">No low stock items found</p>
+                    <button
+                      onClick={() => setFilter('all')}
                       className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 shadow-sm hover:shadow inline-flex items-center gap-2 transition-all cursor-pointer"
                     >
-                      <Package className="h-5 w-5" />
-                      Add Your First Stock
-                    </Link>
-                  )
+                      View All Stock
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-gray-500 text-lg mb-4">No stock items found</p>
+                    {canManage && (
+                      <Link
+                        href="/stock/add"
+                        className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 shadow-sm hover:shadow inline-flex items-center gap-2 transition-all cursor-pointer"
+                      >
+                        <Package className="h-5 w-5" />
+                        Add Your First Stock
+                      </Link>
+                    )}
+                  </>
                 )}
               </div>
             ) : (
               <>
-                <div className="mb-4 text-sm text-gray-600">
-                  Showing {filteredStocks.length} stock item{filteredStocks.length !== 1 ? 's' : ''}
-                  {filter === 'low' && ` (${stocks.length} total)`}
-                </div>
+                {!searchTerm && (
+                  <div className="mb-4 text-sm text-gray-600">
+                    Showing {filteredStocks.length} stock item{filteredStocks.length !== 1 ? 's' : ''}
+                    {filter === 'low' && ` (${stocks.length} total)`}
+                  </div>
+                )}
 
                 <div className="overflow-x-auto">
                   <table className="w-full border-separate border-spacing-0 rounded-lg overflow-hidden">
